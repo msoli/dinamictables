@@ -1,0 +1,11 @@
+<div class="container " style="margin-top: 30px; ">
+<!-- <div style="width: 720px;;"> -->
+<dt-dinamictable [data]="datos"
+              [columns]="columnas"
+              [configTable]="config"
+              (pageChange)="onPageChange($event)"
+              (tableReady)="onTableReady($event)"></dt-dinamictable>
+            <!-- </div> -->
+
+<button (click)="getData()" >Call Api</button>
+</div>

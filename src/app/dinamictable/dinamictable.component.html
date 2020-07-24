@@ -1,0 +1,196 @@
+<div #containerdinamictable class="container-dinamictable">
+
+  <div #wrapdinamictable  class="wrap-dinamictable"
+  [ngStyle]="{'max-width.px': wraptableWidth}"
+  [ngClass]="{'scrollx': tableWidth > this.defaultContainerWidth}">
+
+    <table #dinamictabledt  class="table  table-hover  dinamictabledt" style="table-layout:fixed; "
+      [ngStyle]="{'width.px': tableWidth}" [id]="fieldId" >
+      <thead>
+        <tr>
+          <ng-container *ngFor="let item of headers">
+            <td scope="row" [attr.col-name]="item.field" *ngIf="item.visible" [ngStyle]="{'width.px': item.width}">
+
+              <ng-container *ngIf="item.sort && item.sort_dir == 'asc' ">
+                <a href="#" (click)="onSortPage(item.field)">{{ item.name }} &#9651;</a>
+              </ng-container>
+
+              <ng-container *ngIf="item.sort && item.sort_dir == 'desc' ">
+                <a href="#" (click)="onSortPage(item.field)">{{ item.name }} &#9661;</a>
+              </ng-container>
+
+              <ng-container *ngIf="item.sort && item.sort_dir == '' ">
+                <a href="#" (click)="onSortPage(item.field)">{{ item.name }}</a>
+              </ng-container>
+
+              <ng-container *ngIf="!item.sort">{{ item.name }}</ng-container>
+
+            </td>
+          </ng-container>
+        </tr>
+
+        <tr *ngIf="configTable.filter">
+          <ng-container *ngFor="let item of headers; let idx = index">
+
+            <ng-container *ngIf="item.filter != null">
+
+              <td *ngIf="item.visible && item.filter == null"></td>
+
+              <td *ngIf="item.visible && item.filter.type == 'input'">
+                <input type="input" class="form-control form-control-sm" [tabindex]="idx"
+                  (keyup)="onSearchData($event.target.value, item.field, item.filter.type)" value="" />
+              </td>
+
+              <td *ngIf="item.visible && item.filter.type == 'select'">
+                <select class="custom-select custom-select-sm" [tabindex]="idx"
+                  (change)="onSearchData($event.target.value, item.field, item.filter.type)">
+                  <option selected></option>
+                  <ng-container *ngFor="let opt of item.filter.data">
+                    <option value="{{opt.key}}">{{opt.value}}</option>
+                  </ng-container>
+
+                </select>
+              </td>
+
+              <td *ngIf="item.visible && item.filter.type == 'date'">
+                <div>
+                  <dt-datepickerdt #itemdatepickerdt
+                    (dateChanged)="onSearchData($event, item.field, item.filter.type)" [tabindex]="idx">
+                  </dt-datepickerdt>
+
+                </div>
+
+              </td>
+            </ng-container>
+
+            <td *ngIf="item.visible && item.filter == null"></td>
+          </ng-container>
+        </tr>
+      </thead>
+      <!-- (click)="deselectRow($event, item.valId)" -->
+      <tbody #tbodydt>
+        <ng-container *ngFor="let item of rows; let idx = index">
+          <tr class="row-dt" [attr.row-id]="item.valId" [ngClass]="{'row-selected': item.selected}">
+            <ng-container *ngFor="let cell of item.cells">
+
+              <td class="tdcell" *ngIf="cell.visible && cell.buttondt == null && cell.editable == null">
+                <div class="cellcontainer "
+                [ngClass]="this.configTable.styles.tdClass"
+                >{{cell.value}}</div>
+              </td>
+
+
+              <td class="tdcell" *ngIf="cell.visible && cell.buttondt == null && cell.editable != null">
+                <div class="cellcontainer"
+                [ngClass]="this.configTable.styles.tdClass"
+                >
+
+                  <input *ngIf="cell.editable.type =='input'" (click)="stop($event)" type="input"
+                    class="form-control form-control-sm"
+                    (keyup)="onChangeValue(item.retDataFn, cell.field, $event.target.value)" [value]="cell.value" />
+
+
+                    <textarea *ngIf="cell.editable.type =='text'" (click)="stop($event)"
+                    class="form-control "
+                    (keyup)="onChangeValue(item.retDataFn, cell.field, $event.target.value)" [value]="cell.value"></textarea>
+
+                  <select *ngIf="cell.editable.type == 'select'" (click)="stop($event)" class="custom-select custom-select-sm"
+                    (change)="onChangeValue(item.retDataFn, cell.field, $event.target.value)">
+                    <option></option>
+                    <option *ngFor="let opt of cell.editable.data" [value]="opt.key" [selected]="cell.value == opt.key">
+                      {{opt.value}}</option>
+                  </select>
+
+                  <dt-datepickerdt #itemdatepickerdt *ngIf="cell.editable.type == 'date'" [dateInit]="cell.value"
+                    (dateChanged)="onChangeValue(item.retDataFn, cell.field, $event)">
+                  </dt-datepickerdt>
+                </div>
+              </td>
+
+              <ng-container *ngIf="cell.visible && cell.buttondt  != null">
+                <td class="tdcell">
+                  <div>
+                    <ng-container *ngFor="let button of cell.buttondt">
+                      <button type="button" [ngClass]="[button.class]" (click)="[button.onClick($event, item.retDataFn)]">
+                        {{button.label}} </button>
+
+                    </ng-container>
+                  </div>
+                </td>
+              </ng-container>
+
+            </ng-container>
+          </tr>
+        </ng-container>
+
+        <tr *ngIf="this.data.length == 0">
+          <td [attr.colspan]="numCols" style="text-align:center">Loading result</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+
+
+  <div *ngIf="configTable.showPagination">
+    <nav aria-label="...">
+      <ul class="pagination">
+        <li class="page-item " [ngClass]="{'disabled': pagination.current_page==1}">
+          <a class="page-link" href="#" (click)="onPrevPage()" tabindex="-1">{{pagination.label_prev}}</a>
+        </li>
+
+        <ng-container *ngFor="let item of pagination.pages; let idx = index;">
+
+          <li class="page-item " [ngClass]="{'active': idx+1==pagination.current_page}">
+            <a class="page-link" (click)="onSelectPage(idx+1)" href="#">
+              <span *ngIf="idx+1 == pagination.current_page" class="sr-only">(current)</span>
+              {{idx + 1}}
+            </a></li>
+        </ng-container>
+
+        <li class="page-item" [ngClass]="{'disabled': pagination.current_page==pagination.total_pages}">
+          <a class="page-link" (click)="onNextPage()" href="#">{{pagination.label_next}}</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+
+  <div>
+
+<div class="ag-theme-alpine ag-paging-panel ag-unselectable">
+  <span ref="eSummaryPanel" class="ag-paging-row-summary-panel">
+      <span ref="lbFirstRowOnPage" class="ag-paging-row-summary-panel-number">1</span>
+      to
+      <span ref="lbLastRowOnPage" class="ag-paging-row-summary-panel-number">10</span>
+      of
+      <span ref="lbRecordCount" class="ag-paging-row-summary-panel-number">110</span>
+  </span>
+  <span class="ag-paging-page-summary-panel">
+      <div ref="btFirst" class="ag-paging-button-wrapper ag-disabled">
+        <span class="ag-icon ag-icon-first" unselectable="on"> </span>
+          <button type="button" class="ag-paging-button">First</button>
+      </div>
+      <div ref="btPrevious" class="ag-paging-button-wrapper ag-disabled"><span class="ag-icon ag-icon-previous" unselectable="on"></span>
+          <button type="button" class="ag-paging-button">Previous</button>
+      </div>
+      <span class="ag-paging-description">
+          Page
+          <span ref="lbCurrent" class="ag-paging-number">1</span>
+          of
+          <span ref="lbTotal" class="ag-paging-number">11</span>
+      </span>
+      <span ref="lbTotal" class="ag-paging-number"> </span>
+      <div ref="btNext" class="ag-paging-button-wrapper"><span class="ag-icon ag-icon-next" unselectable="on"></span>
+          <button type="button" class="ag-paging-button">Next</button>
+      </div>
+      <div ref="btLast" class="ag-paging-button-wrapper"><span class="ag-icon ag-icon-last" unselectable="on"></span>
+          <button type="button" class="ag-paging-button">Last</button>
+      </div>
+  </span>
+</div>
+  </div>
+
+</div>
+

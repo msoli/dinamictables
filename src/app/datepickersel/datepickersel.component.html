@@ -1,0 +1,41 @@
+<div class="dp-overlay-container">
+    <div (click)="close()" class="dp-overlay-backdrop-showing"></div>
+    <div #containerfieldsdp class="container-dp">
+        <!-- <div class="fields-dp" #fieldsdp *ngIf="isOpen" (click)="stop($event)"> -->
+        <div class="fields-dp" #fieldsdp (click)="stop($event)">
+
+            <div class="field-dp">
+                <select class="dt-datepicker dt-datepicker-sm" name="day" [(ngModel)]="day" (change)="setFecha()">
+                    <option *ngFor="let item of numDaysOfMonth; let idx = index;" [ngValue]="idx+1">{{idx + 1}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="field-dp">
+                <select class="dt-datepicker dt-datepicker-sm" (change)="setFecha()" name="month" [(ngModel)]="month"
+                    style="">
+                    <option *ngFor="let item of listMonths" [ngValue]="item.key">{{item.value}}</option>
+                </select>
+            </div>
+
+            <div class="field-dp">
+                <select class="dt-datepicker dt-datepicker-sm" (change)="setFecha()" name="year" [(ngModel)]="year"
+                    style="">
+                    <option *ngFor="let item of yearsArray; let idx = index;" [ngValue]="yearInit+idx">
+                        {{yearInit + idx}}
+                    </option>
+                </select>
+            </div>
+
+            <div style="clear: both"></div>
+            <div style="margin-top: 5px">
+                <div style="float: left; width: 50%;text-align: center">
+                    <button style="width: 96%; margin-right: 4px" (click)="confirm($event)">Aceptar</button>
+                </div>
+                <div style="float: left; width: 50%;text-align: center">
+                    <button style="width: 96%; margin-left: 4px" (click)="clear($event)">Limpiar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
